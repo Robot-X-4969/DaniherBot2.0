@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.source.systems;
 
 import org.firstinspires.ftc.teamcode.libs.components.XCamera;
 import org.firstinspires.ftc.teamcode.libs.components.XDriverStation;
+import org.firstinspires.ftc.teamcode.libs.components.XPinpoint;
 import org.firstinspires.ftc.teamcode.libs.drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.libs.templates.XOpMode;
 import org.firstinspires.ftc.teamcode.libs.templates.XModule;
@@ -9,6 +10,7 @@ import org.firstinspires.ftc.teamcode.libs.util.Scheduler;
 
 public class CameraSystem extends XModule {
 
+    private XPinpoint pinpoint;
     private XCamera camera;
 
     private final MecanumDrive drive;
@@ -16,12 +18,17 @@ public class CameraSystem extends XModule {
     private boolean isAligning;
 
     private double lastError;
-
-    public CameraSystem(XOpMode op, MecanumDrive drive) {
+    private double theta;
+    private double targetHeading;
+    private double wrappedError;
+    private double error;
+    public CameraSystem(XOpMode op, MecanumDrive drive, XPinpoint pinpoint) {
 
         super(op);
 
         this.drive = drive;
+
+        this.pinpoint = pinpoint;
 
     }
 
@@ -54,13 +61,13 @@ public class CameraSystem extends XModule {
 
         camera.loop();
 
-        if(isAligning && camera.seesAprilTag(20)){
+        if(isAligning && camera.seesAprilTag(24)){
 
-            double xAngle = camera.getTx(camera.getAprilTagIndex(20));
+            autoAlign(camera.getTx(camera.getAprilTagIndex(24)), deltaTime);
 
-            autoAlign(xAngle, deltaTime);
 
-        } else if (isAligning && !camera.seesAprilTag(20)) {
+
+        } else if (isAligning && !camera.seesAprilTag(24)) {
 
             isAligning = false;
 
@@ -68,12 +75,13 @@ public class CameraSystem extends XModule {
 
         }
 
+
     }
 
     @Override
     public void control_loop()  {
 
-        if(camera.seesAprilTag(20) && op.getXDriverStation().getGamepad1().getA().wasPressed() && !isAligning){
+        if(op.getXDriverStation().getGamepad1().getLeftTriggerPressure() >= 0.5 && !isAligning){
 
             isAligning = true;
 
@@ -86,13 +94,10 @@ public class CameraSystem extends XModule {
     @Override
     public void displayTelemetry(){
 
-        op.getTelemetry().addData("Camera Sees Tag 20: ", camera.seesAprilTag(20));
-
-
-        op.getTelemetry().addData("Tag 20 X Angle: ", "N/A");
-
-        op.getTelemetry().addData("Is Aligning: ", isAligning);
-
+        op.getTelemetry().addData("theta" , theta);
+        op.getTelemetry().addData("target heading: ", targetHeading);
+        op.getTelemetry().addData("wrapped error: ", wrappedError);
+        op.getTelemetry().addData("error: ", error);
 
     }
 
@@ -139,6 +144,73 @@ public class CameraSystem extends XModule {
     public XCamera getCamera(){
 
         return camera;
+
+    }
+
+    public void pinpointAutoAlign(int team){
+
+        double x = pinpoint.getX();
+        double y = pinpoint.getY();
+
+        double heading = pinpoint.getHeading();
+
+        double thetaToGoal;
+        if(team == 0)
+        {
+            thetaToGoal = Math.toDegrees(Math.atan2(138.0 - x, -6.0 - y));
+        } else {
+            thetaToGoal = Math.toDegrees(Math.atan2(138.0 - x, -138 - y));
+        }
+
+        this.theta = thetaToGoal;
+
+        double error = thetaToGoal - heading;
+        this.error = error;
+
+        /*
+        while(error > 180.0){
+
+            error -= 360.0;
+
+        }
+
+        while(error < -180.0){
+
+            error += 360.0;
+
+        }
+
+         */
+
+        this.wrappedError = error;
+
+
+        double kP = 0.008;
+
+        if(Math.abs(error) > 2.0){
+
+            double power = error * kP;
+
+            if(power > 0){
+
+                drive.setAutoR(Math.min(-power, -0.1));
+
+            } else if (power < 0) {
+
+                drive.setAutoR(Math.max(-power, 0.1));
+
+            }
+
+        } else {
+
+            drive.setAutoR(0);
+
+            drive.setAllowedRotation(true);
+
+            isAligning = false;
+
+        }
+
 
     }
 

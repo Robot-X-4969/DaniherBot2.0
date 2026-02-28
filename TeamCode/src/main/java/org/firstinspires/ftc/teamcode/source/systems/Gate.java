@@ -24,13 +24,16 @@ public class Gate extends XModule {
 
         super.init(scheduler, driverStation);
 
-        servo1 = new XServo(op, "gateServo1", 90 * (1.0 / 300.0));
+        servo1 = new XServo(op, "gateServo1", 0.0);
         servo1.init();
         servo1.setReversed(false);
+        servo1.setPosition(0.0);
 
-        servo2 = new XServo(op, "gateServo2", 90 * (1.0 / 300.0));
+        servo2 = new XServo(op, "gateServo2", 0.0);
         servo2.init();
         servo2.setReversed(true);
+        servo2.setPosition(0.0);
+
 
     }
 
@@ -66,13 +69,13 @@ public class Gate extends XModule {
 
         if(gateOpen){
 
-            servo1.setPosition(90 * (1.0 / 300.0));
-            servo2.setPosition(90 * (1.0 / 300.0));
+            servo1.setPosition(0.0);
+            servo2.setPosition(0.0);
 
         } else {
 
-            servo1.setPosition(0.0);
-            servo2.setPosition(0.0);
+            servo1.setPosition(100 * (1.0 / 300.0));
+            servo2.setPosition(100 * (1.0 / 300.0));
 
         }
 

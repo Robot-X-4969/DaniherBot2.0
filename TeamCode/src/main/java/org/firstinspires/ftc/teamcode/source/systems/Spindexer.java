@@ -14,7 +14,11 @@ public class Spindexer extends XModule {
 
     XServo gate1, gate2;
 
+    private Gate gate;
+
     private static final int INCREMENT = 475;
+
+    private static final double GATE_INCREMENT = 240.0 * (1.0 / 1800.0);
 
     private static final double START_ANGLE = 40.0 / 360.0 / 5.0;
     
@@ -23,9 +27,11 @@ public class Spindexer extends XModule {
     private boolean burstFire;
 
 
-    public Spindexer(XOpMode op) {
+    public Spindexer(XOpMode op, Gate gate) {
 
         super(op);
+
+        this.gate = gate;
 
     }
 
@@ -91,26 +97,24 @@ public class Spindexer extends XModule {
 
     public void burstFire(){
 
-        fire();
+        fire(1);
 
         isFiring = true;
 
-        scheduler.setEvent(1000L, "reset1" , this::resetGate);
-
         scheduler.setEvent(1500L, "increment1" , () -> incrementSpindexer(true));
 
-        scheduler.setEvent(2000L, "fire2" , this::fire);
-
-        scheduler.setEvent(3000L, "reset2" , this::resetGate);
+        scheduler.setEvent(2000L, "fire2" , () -> fire(2));
 
         scheduler.setEvent(3500L, "increment2" , () -> incrementSpindexer(true));
 
-        scheduler.setEvent(4000L, "fire3" , this::fire);
+        scheduler.setEvent(4000L, "fire3" , () -> fire(3));
 
         scheduler.setEvent(5000L, "reset3" , () -> {
 
             resetGate();
             isFiring = false;
+            gate.toggleGate();
+
 
         });
 
@@ -118,7 +122,7 @@ public class Spindexer extends XModule {
 
     public void manualFire(){
 
-        fire();
+        fire(1);
         isFiring = true;
 
         scheduler.setEvent(1000L, "resetGate", () -> {
@@ -131,10 +135,10 @@ public class Spindexer extends XModule {
 
     }
 
-    public void fire(){
+    public void fire(int fireCount){
 
-        gate1.setPosition(1 - START_ANGLE + (-2.0 / 15.0));
-        gate2.setPosition(START_ANGLE + (2.0 / 15.0));
+        gate1.setPosition(1 - (START_ANGLE + (fireCount * GATE_INCREMENT)));
+        gate2.setPosition(START_ANGLE + (fireCount * GATE_INCREMENT));
 
     }
 

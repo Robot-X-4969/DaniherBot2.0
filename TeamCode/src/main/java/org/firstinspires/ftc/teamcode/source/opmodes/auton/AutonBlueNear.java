@@ -16,13 +16,13 @@ import org.firstinspires.ftc.teamcode.libs.tuning.PedroConstants;
 import org.firstinspires.ftc.teamcode.libs.util.PoseStorage;
 import org.firstinspires.ftc.teamcode.source.systems.CameraSystem;
 import org.firstinspires.ftc.teamcode.source.systems.Flywheel;
+import org.firstinspires.ftc.teamcode.source.systems.Gate;
 import org.firstinspires.ftc.teamcode.source.systems.IntakeSystem;
 import org.firstinspires.ftc.teamcode.source.systems.Spindexer;
 
 @Autonomous(name = "BLUE_NEAR", group = "auton")
 public class AutonBlueNear extends XAuton {
     private enum StateMachine {
-
         DRIVE_START,
         SHOOT_1,
         COLLECT_BALLS_1,
@@ -41,26 +41,34 @@ public class AutonBlueNear extends XAuton {
     private PathChain collectBalls2;
     private PathChain reset2;
 
-    private final Pose startPosition = new Pose(20.480, 122.432, Math.toRadians(144.0));
+    private double lastTime = 0.0;
 
+    private final Pose startPosition = new Pose(24, 120, Math.toRadians(135.0));
+
+    Gate gate = new Gate(this);
     XPinpoint pinpoint = new XPinpoint(this, 1.125, 4.625);
     MecanumDrive drive = new MecanumDrive(this);
-    CameraSystem cameraSystem = new CameraSystem(this, drive);
+    CameraSystem cameraSystem = new CameraSystem(this, drive, pinpoint);
     Flywheel flywheel = new Flywheel(this, cameraSystem, pinpoint);
-    Spindexer spindexer = new Spindexer(this);
+    Spindexer spindexer = new Spindexer(this, gate);
     IntakeSystem intakeSystem = new IntakeSystem(this);
+
 
     public void buildPaths(){
 
         driveStart = follower.pathBuilder()
-                .addPath(new BezierLine(new Pose(20.480, 122.432), new Pose(59.456, 83.808)))
-                .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(136))
+                .addPath(new BezierLine(new Pose(24, 120), new Pose(59, 80)))
+                .setLinearHeadingInterpolation(Math.toRadians(135), Math.toRadians(135))
                 .build();
 
         collectBalls1 = follower.pathBuilder()
-                .addPath(new BezierLine(new Pose(59.456, 83.808), new Pose(41.392, 83.808)))
+                .addPath(new BezierLine(new Pose(59, 80), new Pose(42, 80)))
                 .setTangentHeadingInterpolation()
-                .addPath(new BezierLine(new Pose(41.392, 83.808), new Pose(19.000, 83.808)))
+                .addPath(new BezierLine(new Pose(42, 80), new Pose(37, 80)))
+                .setTangentHeadingInterpolation()
+                .addPath(new BezierLine(new Pose(42, 80), new Pose(32, 80)))
+                .setTangentHeadingInterpolation()
+                .addPath(new BezierLine(new Pose(42, 80), new Pose(27, 80)))
                 .setTangentHeadingInterpolation()
                 .build();
 
@@ -86,11 +94,13 @@ public class AutonBlueNear extends XAuton {
     @Override
     public void init_modules(){
 
+        pinpoint.init();
         registerModule(drive, XModuleManager.ModuleType.ACTIVE);
         registerModule(cameraSystem, XModuleManager.ModuleType.ACTIVE);
         registerModule(flywheel, XModuleManager.ModuleType.ACTIVE);
         registerModule(spindexer, XModuleManager.ModuleType.ACTIVE);
         registerModule(intakeSystem, XModuleManager.ModuleType.ACTIVE);
+        registerModule(gate, XModuleManager.ModuleType.ACTIVE);
 
     }
 
@@ -99,7 +109,7 @@ public class AutonBlueNear extends XAuton {
 
         super.initialize();
 
-        pinpoint.setStartPose(20.480, 122.432, Math.toRadians(144.0));
+        //pinpoint.setStartPose(20.480, 122.432, Math.toRadians(144.0));
 
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
@@ -112,6 +122,12 @@ public class AutonBlueNear extends XAuton {
 
     @Override
     public void run(){
+
+        super.run();
+
+        intakeSystem.loop(delta);
+
+        flywheel.loop(delta);
 
         follower.update();
 
@@ -142,6 +158,18 @@ public class AutonBlueNear extends XAuton {
             case COLLECT_BALLS_1:
 
                 if(!follower.isBusy() && !spindexer.getIsFiring()){
+
+                    scheduler.scheduleEvent(400, () -> follower.setMaxPower(0.5));
+                    scheduler.scheduleEvent(800, () -> follower.setMaxPower(0.3));
+                    scheduler.scheduleEvent(1800, () -> spindexer.incrementSpindexer(true));
+                    scheduler.scheduleEvent(2000, () -> spindexer.incrementSpindexer(true));
+                    scheduler.scheduleEvent(2900, () -> gate.toggleGate());
+
+                    //scheduler.scheduleEvent(1000, () -> follower.setMaxPower(0));
+                    //scheduler.scheduleEvent(1100, () -> follower.setMaxPower(0.5));
+                    //scheduler.scheduleEvent(1900, () -> spindexer.incrementSpindexer(true));
+                    //scheduler.scheduleEvent(1200, () -> spindexer.incrementSpindexer(true));
+
 
                     telemetry.addLine("collecting");
                     follower.followPath(collectBalls1, true);
@@ -206,7 +234,7 @@ public class AutonBlueNear extends XAuton {
                     telemetry.addLine("shot thrice");
                     spindexer.burstFire();
 
-                    PoseStorage.setCurrentPose(pinpoint.getPose());
+                    //PoseStorage.setCurrentPose(pinpoint.getPose());
 
                     currentState = StateMachine.STOP;
 

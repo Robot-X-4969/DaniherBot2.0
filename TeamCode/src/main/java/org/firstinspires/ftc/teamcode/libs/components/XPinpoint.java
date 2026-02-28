@@ -44,7 +44,7 @@ public class XPinpoint {
 
         device.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.REVERSED);
 
-        device.resetPosAndIMU();
+        //device.resetPosAndIMU();
 
     }
 

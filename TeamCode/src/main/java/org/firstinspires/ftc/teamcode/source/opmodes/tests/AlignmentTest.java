@@ -12,13 +12,13 @@ import org.firstinspires.ftc.teamcode.source.systems.CameraSystem;
 public class AlignmentTest extends XTeleOp {
 
     MecanumDrive drive = new MecanumDrive(this);
-    CameraSystem camera = new CameraSystem(this, drive);
+    //CameraSystem camera = new CameraSystem(this, drive, null);
 
     @Override
     public void init_modules() {
 
         registerModule(drive, XModuleManager.ModuleType.ACTIVE);
-        registerModule(camera, XModuleManager.ModuleType.ACTIVE);
+        //registerModule(camera, XModuleManager.ModuleType.ACTIVE);
 
     }
 
@@ -28,7 +28,7 @@ public class AlignmentTest extends XTeleOp {
         super.displayTelemetry();
 
         drive.displayTelemetry();
-        camera.displayTelemetry();
+        //camera.displayTelemetry();
 
     }
 

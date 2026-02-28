@@ -16,5 +16,6 @@ public interface XOpMode {
     Telemetry getTelemetry();
     Scheduler getScheduler();
     XDriverStation getXDriverStation();
+    void registerModule(XModule module, XModuleManager.ModuleType type);
 
 }

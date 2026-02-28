@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.libs.tuning.PedroConstants;
 import org.firstinspires.ftc.teamcode.libs.util.PoseStorage;
 import org.firstinspires.ftc.teamcode.source.systems.CameraSystem;
 import org.firstinspires.ftc.teamcode.source.systems.Flywheel;
+import org.firstinspires.ftc.teamcode.source.systems.Gate;
 import org.firstinspires.ftc.teamcode.source.systems.IntakeSystem;
 import org.firstinspires.ftc.teamcode.source.systems.Spindexer;
 
@@ -43,11 +44,12 @@ public class AutonBlueFar extends XAuton {
 
     private final Pose startPosition = new Pose(20.551020408163268, 122.24489795918367, Math.toRadians(144.0));
 
+    Gate gate = new Gate(this);
     XPinpoint pinpoint = new XPinpoint(this, 1.125, 4.625);
     MecanumDrive drive = new MecanumDrive(this);
-    CameraSystem cameraSystem = new CameraSystem(this, drive);
+    CameraSystem cameraSystem = new CameraSystem(this, drive, pinpoint);
     Flywheel flywheel = new Flywheel(this, cameraSystem, pinpoint);
-    Spindexer spindexer = new Spindexer(this);
+    Spindexer spindexer = new Spindexer(this, gate);
     IntakeSystem intakeSystem = new IntakeSystem(this);
 
     public void buildPaths(){
@@ -206,7 +208,7 @@ public class AutonBlueFar extends XAuton {
                     telemetry.addLine("shot thrice");
                     spindexer.burstFire();
 
-                    PoseStorage.setCurrentPose(pinpoint.getPose());
+                    //PoseStorage.setCurrentPose(pinpoint.getPose());
 
                     currentState = StateMachine.STOP;
 

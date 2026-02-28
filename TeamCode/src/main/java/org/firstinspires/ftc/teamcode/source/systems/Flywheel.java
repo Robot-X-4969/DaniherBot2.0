@@ -64,15 +64,10 @@ public class Flywheel extends XModule {
         servo2 = new XServo(op, "hood2", 0.0);
         servo2.init();
 
-        servo1.setPWMRange(500, 2500);
-        servo2.setPWMRange(500, 2500);
-
     }
 
     @Override
     public void loop(double deltaTime){
-
-        pinpoint.update();
 
         calculateDistance();
 
@@ -89,6 +84,7 @@ public class Flywheel extends XModule {
 
     @Override
     public void start(){
+
 
 
     }
@@ -119,15 +115,7 @@ public class Flywheel extends XModule {
 
         op.getTelemetry().addData("X", pinpoint.getX());
         op.getTelemetry().addData("Y", pinpoint.getY());
-        op.getTelemetry().addData("Heading", pinpoint.getHeading());
         op.getTelemetry().addData("distance", distance);
-
-        int index = cameraSystem.getCamera().getAprilTagIndex(20);
-
-        if(index != -1){
-            op.getTelemetry().addData("Area", cameraSystem.getCamera().getTa(index));
-        }
-
 
     }
 
@@ -160,16 +148,14 @@ public class Flywheel extends XModule {
 
     public void calculateAngleAndRPM(){
 
-        int index = cameraSystem.getCamera().getAprilTagIndex(20);
 
-        if(index != -1){
 
-            final double velocityScalar = 1.5;
+            final double velocityScalar = 0.9;
 
-            final double angleOffset = 40.0;
+            final double angleOffset = 50.0;
             final double ratio = 2.0;
             final double g = 9.8;
-            final double h = 1.0;
+            final double h = 1.1;
             final double phi = -60.0;
             final double pi = 3.1415926535;
 
@@ -180,7 +166,7 @@ public class Flywheel extends XModule {
             if(theta <= angleOffset){
 
                 this.normalizedTheta = 0.0;
-                theta = 45.0;
+                theta = angleOffset;
 
             } else {
 
@@ -194,13 +180,13 @@ public class Flywheel extends XModule {
             double denominator = 2.0 * (distance * Math.tan(Math.toRadians(theta)) - h) * Math.pow(Math.cos(Math.toRadians(theta)), 2);
             double velocity = Math.sqrt(numerator / denominator);
 
-            final double adjustedVelocity = velocity * 2.0 * velocityScalar;
+            final double adjustedVelocity = velocity * 2 * velocityScalar;
 
             this.RPM = (adjustedVelocity * 60.0) / (2 * pi * wheelRadius);
 
 
 
-        }
+
 
     }
 

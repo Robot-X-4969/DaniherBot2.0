@@ -124,6 +124,7 @@ public abstract class XTeleOp extends OpMode implements XOpMode {
 
     }
 
+    @Override
     public void registerModule(XModule module, XModuleManager.ModuleType type){
 
         manager.register_module(module, type);

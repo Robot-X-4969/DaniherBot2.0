@@ -90,10 +90,7 @@ public class MecanumDrive extends XModule {
     @Override
     public void displayTelemetry() {
 
-        op.getTelemetry().addData("Orientation Mode", orientationMode);
-        op.getTelemetry().addData("Global Angle", globalAngle);
-        op.getTelemetry().addData("Offset", offset);
-        op.getTelemetry().addData("Robot Angle", globalAngle - offset);
+
 
     }
 

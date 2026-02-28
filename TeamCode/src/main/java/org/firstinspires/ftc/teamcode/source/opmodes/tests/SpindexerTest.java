@@ -13,7 +13,7 @@ public class SpindexerTest extends XTeleOp {
     @Override
     public void init_modules() {
 
-        registerModule(new Spindexer(this), XModuleManager.ModuleType.ACTIVE);
+        //registerModule(new Spindexer(this), XModuleManager.ModuleType.ACTIVE);
 
     }
 

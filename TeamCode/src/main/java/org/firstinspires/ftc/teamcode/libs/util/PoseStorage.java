@@ -1,20 +1,18 @@
 package org.firstinspires.ftc.teamcode.libs.util;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import com.pedropathing.geometry.Pose;
 
 public abstract class PoseStorage {
 
-    static Pose2D currentPose = new Pose2D(DistanceUnit.INCH, 0,0, AngleUnit.RADIANS, 0);
+    static Pose currentPose = new Pose(0,0,0);
 
-    public static Pose2D getCurrentPose() {
+    public static Pose getCurrentPose() {
 
         return currentPose;
 
     }
 
-    public static void setCurrentPose(Pose2D newPose) {
+    public static void setCurrentPose(Pose newPose) {
 
         currentPose = newPose;
 
